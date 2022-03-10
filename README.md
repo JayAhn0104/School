@@ -2,7 +2,7 @@
 
 ## Seminar (slides)
 
-| Title | Slide | Description |
+| Subject | Slide | Description |
 |:--------------------------------------------------------------------:|:---------------------------------------------------------:|:-----------:|
 | (Introduction) Decision Tree | [Decision Tree.pdf](Seminar/1_Decision_Tree.pdf) |             |
 | (Introduction) Random Forest | [Random Forest.pdf](Seminar/2_RandomForest.pdf) |             |
