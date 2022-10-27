@@ -1,0 +1,189 @@
+---
+title: "Penalized Model-based Clustering"
+author: "Jaehyeong Ahn"
+date: '2022 10 28 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. Gaussian Mixture Model (multivariate ver)
+
+## 1.1. Define a function
+```{r cars}
+em.multiv.ex2.input.k=function(data,iter.max=1000,k=2,seed=1,show.iter=F,eps=1e-15) {
+  require(mvtnorm)
+  set.seed(seed)
+  loglike.h=rep(NA,iter.max)
+  n=nrow(data)
+  p.vec=rep(1/k,k)
+  tau.list=vector("list",k)
+  sample.ind=sample(c(1:k),nrow(data),replace=T,prob=p.vec)
+  
+  mu.list=vector("list",k)
+  sigma.list=vector("list",k)
+  for (c in 1:k) {
+    mu.list[[c]]=colMeans(data[sample.ind==c,])
+    sigma.list[[c]]=cov(data[sample.ind==c,])
+  }
+  
+  tau.mod=vector("list",k)
+  for (iter in 1:iter.max) {
+    ####### E Step
+    for (c in 1:k) {
+      tau.mod[[c]]=(p.vec[c]*dmvnorm(data,mu.list[[c]],sigma.list[[c]]))
+      tau.mat=matrix(unlist(tau.mod),nrow=n)
+    }
+    for (c2 in 1:k) {tau.list[[c2]]=tau.mat[,c2]/rowSums(tau.mat)}
+    ####### M Step
+    for (c2 in 1:k) {
+      mu.list[[c2]]=colSums(tau.list[[c2]]*(data)/sum(tau.list[[c2]]))
+      sigma.list[[c2]]=cov.wt(data,tau.list[[c2]],center = T)$cov
+      p.vec[c2]=sum(tau.list[[c2]])/n
+    }
+    ####
+    like.df=data.frame(k=1:k,loglik=rep(0,k))
+    for (c2 in 1:k) {
+      like.df[c2,2]=sum(tau.list[[c2]]*(log(p.vec[c2])+log(dmvnorm(data,mu.list[[c2]],sigma.list[[c2]]))))
+    }
+    
+    loglike.h[iter]=sum(like.df[,2])
+    if(show.iter==T) {print(paste0("iteration: ",iter," / ",loglike.h[iter]))}
+    if(iter>1) {
+      if(loglike.h[iter]-loglike.h[iter-1]<eps){
+        loglike.h=loglike.h[1:(iter)]
+        break
+      }
+    }
+  }
+  cprob.list=vector("list",k)
+  for (c2 in 1:k) {cprob.list[[c2]]=tau.mat[,c2]/rowSums(tau.mat)}
+  return(list(mu=mu.list,sigma=sigma.list,pi=round(p.vec,4),like=data.frame(iter=1:(iter),likelihood=loglike.h),
+              probs=matrix(round(unlist(cprob.list),4),nrow=n),
+              class=apply(matrix(round(unlist(cprob.list),4),nrow=n),1,function(x){which.max(x)})))
+}
+```
+
+## 1.2. Run Gaussian Mixture Model
+
+```{r pressure, echo=FALSE}
+clust.iris=em.multiv.ex2.input.k(as.matrix(iris[,c(1,4)]),iter.max=10000,eps=1e-11,k=3,seed=2)
+```
+
+## 1.3. Results
+
+### 1.3.1. classification table
+```{r}
+table(pred=clust.iris$class,act=iris$Species)
+```
+
+### 1.3.2. plotting
+```{r}
+library(ggplot2)
+clust.iris.plot=data.frame(iris[,c(1,4)],class=clust.iris$class)
+ggplot(clust.iris.plot,aes(Sepal.Length,Petal.Width,col=as.factor(class)))+geom_point(size=2)+geom_density2d()+theme_classic()
+```
+
+# 2. Penalized model-based clustering
+
+## 2.1. Define a function
+```{r}
+em.lasso.ex2.input.k2=function(data,iter.max=1000,k=4,lam,seed=1,eps=1e-15) {
+  require(mvtnorm)
+  set.seed(seed);n=nrow(data);loglike.h=rep(NA,iter.max)
+  p.vec=rep(1/k,k)
+  sample.ind=sample(c(1:k),nrow(data),replace=T,prob=p.vec)
+  tau.list=vector("list",k);mu.list=vector("list",k);sigma.list=vector("list",k)
+  tau.mod=vector("list",k)
+  sigma.calcu=diag(cov(data))
+  for (c in 1:k) {
+    mu.list[[c]]=colMeans(data[sample.ind==c,])
+  }
+  for (iter in 1:iter.max) {
+    #####################################################################
+    # E-step
+    
+    for (c in 1:k) {
+      tau.mod[[c]]=(p.vec[c]*dmvnorm(data,mu.list[[c]],diag(sigma.calcu)))
+      tau.mat=matrix(unlist(tau.mod),nrow=n)
+    }
+    
+    for (c2 in 1:k) {tau.list[[c2]]=tau.mat[,c2]/rowSums(tau.mat)}
+    
+    #################################################################################    
+    # M-step
+    ############################3
+    # sigma
+    for (c2 in 1:k){
+      for (j in 1:ncol(data)) {
+        sigma.list[[c2]][j]=sum(tau.list[[c2]]*((data[,j]-mu.list[[c2]][j])^2))/n
+      }
+    }
+    sigma.calcu=colSums(do.call(rbind,sigma.list))
+    # phi and mu
+    for (c2 in 1:k) {
+      
+      p.vec[c2]=sum(tau.list[[c2]])/n
+      mu.list[[c2]]=colSums(tau.list[[c2]]*(data)/sum(tau.list[[c2]]))
+      ## penalty.checking
+      for (j in 1:ncol(data)) {
+        if (lam > abs(sum(tau.list[[c2]]*data[,j]/sigma.calcu[j]))) {
+          mu.list[[c2]][j]=0 
+        } else {mu.list[[c2]][j]=sign(mu.list[[c2]][j])*(abs(mu.list[[c2]][j])-lam*sigma.calcu[j]/sum(tau.list[[c2]]))}
+      }
+    }
+    #############################
+    like.df=data.frame(k=1:k,loglik=rep(0,k))
+    for (c2 in 1:k) {
+      like.df[c2,2]=sum(tau.list[[c2]]*(log(p.vec[c2])+log(dmvnorm(data,mu.list[[c2]],diag(sigma.calcu)))))
+    }
+    loglike.h[iter]=sum(like.df[,2])-lam*sum(unlist(lapply(mu.list,sum)))
+    print(paste0("iteration: ",iter," / ",loglike.h[iter]))
+    if(iter>1) {
+      if(loglike.h[iter]-loglike.h[iter-1]<eps){
+        loglike.h=loglike.h[1:(iter)]
+        break
+      }
+    }
+  }
+  cprob.list=vector("list",k)
+  for (c2 in 1:k) {cprob.list[[c2]]=tau.mat[,c2]/rowSums(tau.mat)}
+  return(list(mu=mu.list,sigma=sigma.calcu,pi=round(p.vec,4),like=data.frame(iter=1:(iter),likelihood=loglike.h),
+              probs=matrix(round(unlist(cprob.list),4),nrow=n),
+              class=apply(matrix(round(unlist(cprob.list),4),nrow=n),1,function(x){which.max(x)})))
+}
+```
+
+## 2.2. Real-Data Analysis: Leukemeia data
+```{r}
+library(plsgenomics); library(fields)
+```
+
+```{r}
+data(leukemia)
+pen.clust.rst=em.lasso.ex2.input.k2(data=scale(leukemia$X[,1:100],center=T,scale=T),iter.max=1000,k=2,seed=1234,eps=1e-11,lam=1)
+```
+
+### 2.2.1. Log-likelihood
+```{r}
+ggplot(pen.clust.rst$like,aes(iter,likelihood))+geom_line(size=1.3,alpha=0.3)+
+  geom_point(size=3,col="tomato")+labs(x="Iteration",y="Loglikelihood")+
+  theme_classic()+theme(axis.title=element_text(size=15))
+```
+
+### 2.2.2. Variable selection
+```{r}
+pen.clust.rst
+```
+
+### 2.2.3. Clustering results: classification table
+```{r}
+table(pred=pen.clust.rst$class,act=leukemia$Y)
+```
+
+```{r}
+sum(diag(table(pred=pen.clust.rst$class,act=leukemia$Y)))/length(leukemia$Y)
+```
+
