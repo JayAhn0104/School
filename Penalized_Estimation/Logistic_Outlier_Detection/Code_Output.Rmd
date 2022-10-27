@@ -1,6 +1,6 @@
 ---
 title: "Phase I outlier detection in profiles with binary data based on penalized likelihood"
-author: "Jaehyeong Ahn"
+author: "Wooyoul Na, Jaehyeong Ahn"
 date: '2019 11 27 '
 output: html_document
 ---

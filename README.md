@@ -26,4 +26,4 @@
 | Subject | Contents | Category |
 |--------------------------------------------------------------------|---------------------------------------------------------|:--------------------------------:|
 | Outlier detection with penalized estimation | [Paper](Penalized_Estimation/Logistic_Outlier_Detection/Original_Paper.pdf) / [Slide](Penalized_Estimation/Logistic_Outlier_Detection/Slide.pdf) / [Code(R)](https://rpubs.com/JayAhn/962669) | Paper review|
-| Penalized model-based Clustering | [Paper](Penalized_Estimation/Penalized_Clustering/Original_Paper.pdf) / [Slide](Penalized_Estimation/Penalized_Clustering/Slide.pdf) / [Code(R)](https://rpubs.com/JayAhn/962662) | Paper review |
+| Penalized model-based Clustering | [Paper](Penalized_Estimation/Penalized_Clustering/Original_Paper.pdf) / [Slide](Penalized_Estimation/Penalized_Clustering/Slide.pdf) / [Code(R)](https://rpubs.com/JayAhn/962674) | Paper review |
