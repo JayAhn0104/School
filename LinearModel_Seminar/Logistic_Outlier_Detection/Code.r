@@ -1,0 +1,198 @@
+# **Outlier detection** {.tabset .tabset-pills .tabset-fade}
+
+## **1. Logistic regression**  
+
+### **1) Simulation data**  
+
+n=1000
+p=10
+x.mat=matrix(runif(n*p),ncol=p)
+b.vec=1/(1:p)
+xb.vec=drop(x.mat %*% b.vec)
+p.vec=exp(xb.vec)/(1+exp(xb.vec))
+y.vec=rbinom(n,1,p.vec)
+
+### **2) Likelihood-Gradient-Hessian**  
+
+like.fun=function(y.vec,x.mat,b.vec){
+  xb.vec=x.mat %*% b.vec
+  p.vec=exp(xb.vec)/(1+exp(xb.vec))
+  like=sum(y.vec*log(p.vec)+(1-y.vec)*log(1-p.vec))
+  return(like)
+}
+
+first.dev.fun=function(y.vec,x.mat,b.vec){
+  xb.vec=x.mat %*% b.vec
+  p.vec=exp(xb.vec)/(1+exp(xb.vec))
+  grad=-(t(x.mat) %*% (y.vec-p.vec))
+  return(grad)
+}
+
+sec.dev.fun=function(x.mat,b.vec){
+  xb.vec=x.mat %*% b.vec
+  p.vec=drop(exp(xb.vec)/(1+exp(xb.vec)))
+  hess = t(x.mat) %*% diag(p.vec*(1-p.vec)) %*% x.mat
+  return(hess)
+}
+
+
+### **3) Logistic regression**  
+
+logis.fun=function(y.vec,x.mat,iter.max=1000,eps=1e-6,iter.print=F){
+  b.vec=rep(0,ncol(x.mat))
+  like.val=NULL
+  for (iter in 1:iter.max){
+    bef.b.vec=b.vec
+    like.val[iter]=like.fun(y.vec,x.mat,bef.b.vec)
+    if (iter.print==T){print(paste0("iteration : ",iter," / LL: ",like.val[iter]))}
+    fst.dev.val=first.dev.fun(y.vec,x.mat,bef.b.vec)
+    sec.dev.val=sec.dev.fun(x.mat,bef.b.vec)
+    b.vec=bef.b.vec-(solve(sec.dev.val) %*% fst.dev.val)
+    
+    if(like.fun(y.vec,x.mat,b.vec)-like.val[iter]<eps){break}
+  }
+  if (iter.print==T){list(likelihood=like.val,coefs=b.vec)} else{return(drop(b.vec))}
+}
+
+logis.out=logis.fun(y.vec,x.mat,iter.print = T)
+plot(logis.out$likelihood,type="o",main="Likelihood by iteration")
+logis.out$coefs
+
+xy.dat=as.data.frame(cbind(y.vec,x.mat))
+coef(glm(y.vec~.-1,data=xy.dat,family="binomial"))
+
+
+
+## **2. Outlier Detection(GPOD)**  
+
+### **1) Simulation data**  
+
+library(Matrix)
+n=20
+m=20
+
+x.mat=cbind(rep(1,n*m))
+b.vec=c(1)
+design.z=list()
+for (j in 1:m){
+  design.z[[j]]=rep(1,n)
+}
+z.mat=as.matrix(.bdiag(design.z))
+del.vec=c(rep(0,17),rep(-3,3))
+
+grp.index=NULL
+for (i in 1:m){
+  grp.index=c(grp.index,rep(i,n))
+}
+
+set.seed(12345)
+exp.vec=exp(x.mat %*% b.vec+z.mat %*% del.vec)
+p.vec=exp.vec/(1+exp.vec)
+y.vec=rbinom(n*m,1,p.vec)
+
+
+### **2) penalized-likelihood**   
+
+pen.like.fun=function(y.vec,x.mat,z.mat,b.vec,del.vec,lambda){
+  p=ncol(x.mat)
+  xb.vec=x.mat %*% b.vec
+  zdel.vec=z.mat %*% del.vec
+  p.vec=exp(xb.vec+zdel.vec)/(1+exp(xb.vec+zdel.vec))
+  pen=lambda*sqrt(t(del.vec) %*% diag(rep(p,m)) %*% del.vec)
+  lik=sum(y.vec*log(p.vec)+(1-y.vec)*log(1-p.vec))
+  like=lik+pen
+  return(like)
+}
+
+### **3) Group-type Penalized Outlier Detection(GPOD)**  
+
+logis.outlier.func=function(y.vec,x.mat,z.mat,grp.index,lambda,iter.max=1000,eps=10^-4,view.iter=F){
+  require(Matrix)
+  p=ncol(x.mat)  
+  
+  ### step 1. median b0hat  
+  b.vec.est=NULL
+  like=NULL
+  for (i in 1:m){
+    b.vec.est[i]=logis.fun(y.vec[which(grp.index==i)],as.matrix(x.mat[which(grp.index==i),]))
+  }
+  b.est=median(b.vec.est)
+  exp.vec=exp(x.mat %*% b.est+z.mat %*% c(b.vec.est-b.est))
+  p.vec=exp.vec/(1+exp.vec)
+  #####3 step 2. original delta
+  ## w.mat 
+  p.grp.list=list()
+  for (j in 1:m){
+    p.grp.list[[j]]=diag(p.vec[which(grp.index==j)]*(1-p.vec[which(grp.index==j)]))
+  }
+  w.mat=as.matrix(.bdiag(p.grp.list))
+  ## q value
+  q.vec=log(p.vec/(1-p.vec))-z.mat %*% rep(b.est,m)+solve(w.mat) %*% (y.vec-p.vec)
+  ## original delta
+  del.0=solve(t(z.mat) %*% w.mat %*% z.mat) %*% t(z.mat) %*% w.mat %*% q.vec
+  old.del.up=del.0
+  #iter=2
+  for (iter in 1:iter.max){
+    if(iter>1){
+      like[iter]=pen.like.fun(y.vec,x.mat,z.mat,b.est,del.vec=old.del.up,lambda=lambda)
+      if(view.iter==T){print(paste0("iter: ",iter," / ","penalized-like: ",like[iter]))}
+    }
+    exp.vec.2=exp(x.mat %*% b.est+z.mat %*% old.del.up)
+    p.vec.2=exp.vec.2/(1+exp.vec.2)
+    ## lamb.mat
+    lamb.mat=lambda*sqrt(p)*diag(drop(1/abs(old.del.up)))
+    lamb.mat[lamb.mat>=1e+5]=1e+5
+    ## w.mat.update
+    p.grp.list.2=list()
+    
+    for (j in 1:m){
+      p.grp.list.2[[j]]=diag(p.vec.2[which(grp.index==j)]*(1-p.vec.2[which(grp.index==j)]))
+    }
+    w.mat.2=as.matrix(.bdiag(p.grp.list.2))
+    ## q value update
+    q.vec.2=log(p.vec.2/(1-p.vec.2))-z.mat %*% rep(b.est,m)+solve(w.mat.2) %*% (y.vec-p.vec.2)
+    ## delta.update
+    del.up=solve(t(z.mat) %*% w.mat.2 %*% z.mat+lamb.mat) %*% (t(z.mat) %*% w.mat.2 %*% q.vec.2)
+    
+    #  del.up[abs((b.est+drop(del.up))-b.est)< 10^-5]=0
+    ## step 4. check convergence
+    if(sum(abs(del.up-old.del.up))/sum(abs(del.up))<eps) {
+      break
+    } else{
+      old.del.up=del.up
+    }
+  }
+  del.up[abs(del.up)<10^-4]=0
+  dlam=sum(as.numeric(abs(del.up)>0))+sum((abs(del.up)/abs(del.0))*(p-1))
+  # like.notpen=like.fun.2(y.vec,x.mat,z.mat,b.est,del.vec=del.up)
+  bic=like[iter]+(1/2)*dlam*log(n)
+  return(list(like=like,bic=bic,del.hat=del.up))  
+}
+
+
+out.result=logis.outlier.func(y.vec,x.mat,z.mat,grp.index,lambda=8,iter.max=1000,eps=10^-4,view.iter=T)
+plot(out.result$like,type="o",main="penalized loss function")
+out.result$del.hat
+
+
+res.list=data.frame(lambda=NA,bic=NA)
+lamb.set=seq(8,20,0.5)
+lamb.set
+
+for (lamb in 1:length(lamb.set)){
+  tun.obj=logis.outlier.func(y.vec,x.mat,z.mat,grp.index,lambda=lamb.set[lamb],iter.max=1000,eps=10^-4)
+  res.list[lamb,1]=lamb.set[lamb]
+  res.list[lamb,2]=tun.obj$bic
+}
+res.list$bic
+plot(res.list$lambda,res.list$bic,main="BIC with lambda",type="o")
+
+res.list$lambda[which.min(res.list$bic)]
+
+out.result=logis.outlier.func(y.vec,x.mat,z.mat,grp.index,lambda=res.list$lambda[which.min(res.list$bic)],iter.max=1000,eps=10^-4)
+
+out.result$del.hat
+
+out.result$del.hat==0
+
+
