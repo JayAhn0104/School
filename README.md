@@ -16,14 +16,14 @@
 | Decision Tree | [Slide](Seminar/1_Decision_Tree.pdf) | Introduction |
 | Random Forest | [Slide](Seminar/2_RandomForest.pdf) | Introduction |
 
-## Penalized Estimation
-| Subject | Contents | Category |
-|--------------------------------------------------------------------|---------------------------------------------------------|:--------------------------------:|
-| Outlier detection with penalized estimation | [Paper](Penalized_Estimation/Logistic_Outlier_Detection/Original_Paper.pdf) / [Slide](Penalized_Estimation/Logistic_Outlier_Detection/Slide.pdf) / [Code(R)](Penalized_Estimation/Logistic_Outlier_Detection/Rmarkdown.html) | Paper review|
-| Penalized model-based Clustering | [Paper](Penalized_Estimation/Penalized_Clustering/Original_Paper.pdf) / [Slide](Penalized_Estimation/Penalized_Clustering/Slide.pdf) / [Code(R)](Penalized_Estimation/Penalized_Clustering/Rmarkdown.html) | Paper review |
-
 ## Non-parametric Statistics
 | Subject | Contents | Category |
 |--------------------------------------------------------------------|---------------------------------------------------------|:--------------------------------:|
 | Censored Regression | [Slide](Seminar/8_Censored_Regression.pdf) / [Report](Nonparametric_Estimation/Censored_Regression/Report.pdf) / [Code(R)](Nonparametric_Estimation/Censored_Regression/Censored_Regression.R) | Paper review |
 | Conditional CDF Estimation | [Report](Nonparametric_Estimation/Conditional_CDF_Estimation/Report.pdf) / [Code(R)](Nonparametric_Estimation/Conditional_CDF_Estimation/Conditional_CDF_Est.R) | Report |
+
+## Penalized Estimation
+| Subject | Contents | Category |
+|--------------------------------------------------------------------|---------------------------------------------------------|:--------------------------------:|
+| Outlier detection with penalized estimation | [Paper](Penalized_Estimation/Logistic_Outlier_Detection/Original_Paper.pdf) / [Slide](Penalized_Estimation/Logistic_Outlier_Detection/Slide.pdf) / [Code(R)](Penalized_Estimation/Logistic_Outlier_Detection/Rmarkdown.html) | Paper review|
+| Penalized model-based Clustering | [Paper](Penalized_Estimation/Penalized_Clustering/Original_Paper.pdf) / [Slide](Penalized_Estimation/Penalized_Clustering/Slide.pdf) / [Code(R)](Penalized_Estimation/Penalized_Clustering/Rmarkdown.html) | Paper review |
