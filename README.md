@@ -15,7 +15,12 @@
 |--------------------------------------------------------------------|---------------------------------------------------------|:--------------------------------:|
 | Decision Tree | [Slide](Seminar/1_Decision_Tree.pdf) | Introduction |
 | Random Forest | [Slide](Seminar/2_RandomForest.pdf) | Introduction |
-| Outlier detection with penalized estimation | [Slide](
+
+## Penalized Estimation
+| Subject | Contents | Category |
+|--------------------------------------------------------------------|---------------------------------------------------------|:--------------------------------:|
+| Outlier detection with penalized estimation | [Paper](Penalized_Estimation/Logistic_Outlier_Detection/Original_Paper.pdf) / [Slide](Penalized_Estimation/Logistic_Outlier_Detection/Slide.pdf) / [Code(R)](Penalized_Estimation/Logistic_Outlier_Detection/Rmarkdown.html) | Paper review|
+| Penalized model-based Clustering | [Paper](Penalized_Estimation/Penalized_Clustering/Original_Paper.pdf) / [Slide](Penalized_Estimation/Penalized_Clustering/Slide.pdf) / [Code(R)](Penalized_Estimation/Penalized_Clustering/Rmarkdown.html) | Paper review |
 
 ## Non-parametric Statistics
 | Subject | Contents | Category |
