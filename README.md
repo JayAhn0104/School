@@ -7,7 +7,7 @@
 | EM Algorithm and its Application to Outlier Detection | [Paper](https://rss.onlinelibrary.wiley.com/doi/abs/10.1111/j.2517-6161.1977.tb01600.x) / [Slide](Seminar/6_EM_Algorithm.pdf) / [Code(R)](https://rpubs.com/JayAhn/650433) | Introduction | 
 | Isolation Forest | [Paper](https://ieeexplore.ieee.org/abstract/document/4781136) / [Slide](Seminar/3_IsolationForest.pdf) | Paper review |
 | Extended Isolation Forest | [Paper](https://ieeexplore.ieee.org/abstract/document/8888179) / [Slide](Seminar/4_Extended_IsolationForest.pdf)      | Paper review |
-| Concentration Effect | [Paper](https://link.springer.com/chapter/10.1007/3-540-49257-7_15) / [Slide](Seminar/7_Concentration_Effect.pdf) | Paper review |
+| Concentration Effect (When Is “Nearest Neighbor” Meaningful?) | [Paper](https://link.springer.com/chapter/10.1007/3-540-49257-7_15) / [Slide](Seminar/7_Concentration_Effect.pdf) | Paper review |
 | A Survey on Unsupervised Subspace Outlier Detection Methods | [Slide](Seminar/9_[Thesis]A_Survey_on_Unsupervised_Subspace_OutlierDetection_Methods_for_HighDimensional_Data.pdf)       | Thesis |
 
 ## Machine Learning
