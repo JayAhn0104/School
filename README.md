@@ -1,6 +1,5 @@
 # School Work Archives
 
-----
 
 ## Anomaly Detection
 | Subject | Contents | Category |
