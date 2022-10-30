@@ -9,7 +9,7 @@
 | Isolation Forest | [Paper](https://ieeexplore.ieee.org/abstract/document/4781136) / [Slide](Seminar/3_IsolationForest.pdf) | Paper review |
 | Extended Isolation Forest | [Paper](https://ieeexplore.ieee.org/abstract/document/8888179) / [Slide](Seminar/4_Extended_IsolationForest.pdf)      | Paper review |
 | Concentration Effect (When Is “Nearest Neighbor” Meaningful?) | [Paper](https://link.springer.com/chapter/10.1007/3-540-49257-7_15) / [Slide](Seminar/7_Concentration_Effect.pdf) | Paper review |
-| A Survey on Unsupervised Subspace Outlier Detection Methods | [Slide](Seminar/9_[Thesis]A_Survey_on_Unsupervised_Subspace_OutlierDetection_Methods_for_HighDimensional_Data.pdf)       | Thesis |
+| A Survey on Unsupervised Subspace Outlier Detection Methods | [Paper](https://doi.org/10.5351/KJAS.2021.34.3.507) / [Slide](Seminar/9_[Thesis]A_Survey_on_Unsupervised_Subspace_OutlierDetection_Methods_for_HighDimensional_Data.pdf)       | Thesis |
 
 ## Machine Learning
 | Subject | Contents | Category |
