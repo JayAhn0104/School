@@ -1,4 +1,4 @@
-# School Work Archives
+# School Works Archive
 
 
 ## Anomaly Detection
